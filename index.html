@@ -1,70 +1,128 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <title>أكواد مهرجان الكرازة 2025</title>
   <style>
     body {
-      font-family: "Tahoma", sans-serif;
+      font-family: "Cairo", sans-serif;
       background: #f4f6f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+      width: 450px;
       text-align: center;
-      padding: 50px;
     }
     h1 {
-      color: #2c3e50;
+      margin-bottom: 10px;
+      font-size: 26px;
+      color: #333;
     }
-    input, button {
-      padding: 10px;
+    h2 {
+      margin-bottom: 20px;
       font-size: 18px;
-      margin: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
+      color: #666;
     }
-    button {
-      background: #2980b9;
-      color: #fff;
-      cursor: pointer;
+    input {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      outline: none;
+      text-align: center;
+      margin-bottom: 15px;
     }
-    button:hover {
-      background: #3498db;
-    }
+    input:focus { border-color: #4CAF50; }
     #result {
-      margin-top: 20px;
-      font-size: 20px;
-      color: #27ae60;
-      font-weight: bold;
+      font-size: 18px;
+      margin-top: 15px;
+    }
+    .success {
+      background: #4CAF50;
+      color: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+    .blocked {
+      background: #ff9800;
+      color: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+    .not-found {
+      color: red;
+      margin-top: 15px;
     }
   </style>
 </head>
 <body>
-  <h1>أكواد مهرجان الكرازة 2025</h1>
-  <input type="text" id="nameInput" placeholder="ادخل الاسم هنا">
-  <button onclick="searchCode()">عرض الكود</button>
-  <div id="result"></div>
+  <div class="container">
+    <h1>📖 أكواد مهرجان الكرازة 2025</h1>
+    <h2>بـ "إيه أثبت على ما تعلمت"</h2>
+    <input type="text" id="searchInput" placeholder="✍️ أدخل الاسم هنا...">
+    <div id="result"></div>
+  </div>
 
   <script>
-    async function searchCode() {
-      let inputName = document.getElementById("nameInput").value.trim().toLowerCase();
-      let resultDiv = document.getElementById("result");
-      resultDiv.innerHTML = "⏳ جاري البحث...";
+    let data = [];
 
-      try {
-        let response = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSNnTef3Y5OP88qu7qeLUbxmUukLz9bpWEEyKErXMLJ8KHFcWKn8Jt7E_yRJo49Cg/pub?gid=2051067971&single=true&output=csv");
-        let data = await response.text();
-        let rows = data.split("\n").map(r => r.split(","));
+    // تحميل ملف JSON
+    fetch("data.json")
+      .then(response => response.json())
+      .then(json => { data = json; });
 
-        // البحث المرن
-        let found = rows.find(row => row[0] && row[0].toLowerCase().replace(/\s+/g, "").includes(inputName.replace(/\s+/g, "")));
-
-        if (found) {
-          resultDiv.innerHTML = "✅ الكود: " + found[1];
-        } else {
-          resultDiv.innerHTML = "❌ الاسم غير موجود";
-        }
-      } catch (error) {
-        resultDiv.innerHTML = "⚠️ حصل خطأ في تحميل البيانات";
-      }
+    // دالة لتوحيد النص للبحث
+    function normalize(text) {
+      return text
+        .replace(/[أإآا]/g, "ا") // توحيد الألف
+        .replace(/ة/g, "ه")      // تحويل التاء المربوطة
+        .replace(/\s+/g, '')     // إزالة المسافات
+        .toLowerCase();
     }
+
+    // البحث أثناء الكتابة
+    document.getElementById("searchInput").addEventListener("input", function() {
+      const input = this.value;
+      const normalizedInput = normalize(input);
+
+      if (normalizedInput.length < 2) {
+        document.getElementById("result").innerHTML = "";
+        return;
+      }
+
+      const found = data.find(item => normalize(item["الاسم"]).includes(normalizedInput));
+
+      if (found) {
+        if (found["الاشتراك"] === "TRUE") {
+          document.getElementById("result").innerHTML = `
+            <div class="success">
+              ✅ الاسم: ${found["الاسم"]}<br>
+              🎓 المرحلة: ${found["المرحلة"]}<br>
+              🆔 الكود: ${found["الكود"]}
+            </div>`;
+        } else {
+          document.getElementById("result").innerHTML = `
+            <div class="blocked">
+              🚫 ${found["الاسم"]}<br>
+              تم حجب النتيجة. يرجى تسديد المبالغ المستحقة.
+            </div>`;
+        }
+      } else {
+        document.getElementById("result").innerHTML = 
+          `<div class="not-found">❌ الاسم غير موجود</div>`;
+      }
+    });
   </script>
 </body>
 </html>
