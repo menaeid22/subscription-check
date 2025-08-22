@@ -1,90 +1,70 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
   <meta charset="UTF-8">
-  <title>اكواد مهرجان الكرازة 2025</title>
+  <title>أكواد مهرجان الكرازة 2025</title>
   <style>
     body {
-      font-family: 'Tahoma', sans-serif;
+      font-family: "Tahoma", sans-serif;
+      background: #f4f6f9;
       text-align: center;
-      background: #f8f9fa;
-      padding: 30px;
+      padding: 50px;
     }
     h1 {
-      font-size: 32px;
-      margin-bottom: 10px;
-      color: #8B0000;
-    }
-    h2 {
-      font-size: 18px;
-      margin-bottom: 25px;
-      color: #333;
+      color: #2c3e50;
     }
     input, button {
       padding: 10px;
-      font-size: 16px;
+      font-size: 18px;
+      margin: 10px;
       border-radius: 8px;
       border: 1px solid #ccc;
-      margin: 5px;
     }
     button {
-      background: #8B0000;
-      color: white;
+      background: #2980b9;
+      color: #fff;
       cursor: pointer;
-      transition: 0.3s;
     }
     button:hover {
-      background: #a00000;
+      background: #3498db;
     }
     #result {
       margin-top: 20px;
       font-size: 20px;
+      color: #27ae60;
       font-weight: bold;
-      color: #006400;
     }
   </style>
 </head>
 <body>
-
-  <h1>اكواد مهرجان الكرازة 2025</h1>
-  <h2>بــ "إيه أثبت على ما تعلمت"</h2>
-
-  <input type="text" id="searchName" placeholder="ادخل الاسم هنا">
-  <button onclick="searchCode()">بحث</button>
-
+  <h1>أكواد مهرجان الكرازة 2025</h1>
+  <input type="text" id="nameInput" placeholder="ادخل الاسم هنا">
+  <button onclick="searchCode()">عرض الكود</button>
   <div id="result"></div>
 
   <script>
-    const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSNnTef3Y5OP88qu7qeLUbxmUukLz9bpWEEyKErXMLJ8KHFcWKn8Jt7E_yRJo49Cg/pub?gid=2051067971&single=true&output=csv";
-
     async function searchCode() {
-      const name = document.getElementById("searchName").value.trim();
-      const resultDiv = document.getElementById("result");
-      resultDiv.innerHTML = "جارى البحث...";
+      let inputName = document.getElementById("nameInput").value.trim().toLowerCase();
+      let resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = "⏳ جاري البحث...";
 
       try {
-        const response = await fetch(sheetURL);
-        const data = await response.text();
+        let response = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSNnTef3Y5OP88qu7qeLUbxmUukLz9bpWEEyKErXMLJ8KHFcWKn8Jt7E_yRJo49Cg/pub?gid=2051067971&single=true&output=csv");
+        let data = await response.text();
+        let rows = data.split("\n").map(r => r.split(","));
 
-        const rows = data.split("\n").map(row => row.split(","));
-        let found = false;
+        // البحث المرن
+        let found = rows.find(row => row[0] && row[0].toLowerCase().replace(/\s+/g, "").includes(inputName.replace(/\s+/g, "")));
 
-        for (let i = 1; i < rows.length; i++) {
-          if (rows[i][0] && rows[i][0].trim() === name) {
-            resultDiv.innerHTML = "الكود: " + rows[i][1];
-            found = true;
-            break;
-          }
-        }
-
-        if (!found) {
-          resultDiv.innerHTML = "⚠️ الاسم غير موجود";
+        if (found) {
+          resultDiv.innerHTML = "✅ الكود: " + found[1];
+        } else {
+          resultDiv.innerHTML = "❌ الاسم غير موجود";
         }
       } catch (error) {
-        resultDiv.innerHTML = "خطأ في تحميل البيانات";
+        resultDiv.innerHTML = "⚠️ حصل خطأ في تحميل البيانات";
       }
     }
   </script>
-
 </body>
 </html>
